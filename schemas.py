@@ -1,48 +1,63 @@
 """
-Database Schemas
+Database Schemas for Fine Arts Club
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
+Each Pydantic model represents a collection in MongoDB. The collection name
+is the lowercase of the class name.
 
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
+Collections:
+- Artwork -> "artwork"
+- Event -> "event"
+- Member -> "member"
+- Message -> "message"
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
+from datetime import datetime
 
-# Example schemas (replace with your own):
 
-class User(BaseModel):
+class Artwork(BaseModel):
     """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
+    Artworks submitted by members or displayed by the club
+    """
+    title: str = Field(..., description="Artwork title")
+    artist: str = Field(..., description="Artist name")
+    image_url: str = Field(..., description="Public URL to the artwork image")
+    medium: Optional[str] = Field(None, description="Medium used e.g., Oil on canvas")
+    year: Optional[str] = Field(None, description="Year created")
+    description: Optional[str] = Field(None, description="Short description of the work")
+    featured: bool = Field(False, description="Whether featured on homepage")
+    tags: List[str] = Field(default_factory=list, description="Tags for filtering")
+
+
+class Event(BaseModel):
+    """
+    Club events (exhibitions, workshops, meetups)
+    """
+    name: str = Field(..., description="Event name")
+    date: datetime = Field(..., description="Event date and time")
+    location: str = Field(..., description="Where the event takes place")
+    description: Optional[str] = Field(None, description="Event details")
+    cover_image: Optional[str] = Field(None, description="Cover image URL")
+    rsvp_link: Optional[str] = Field(None, description="External RSVP link if any")
+
+
+class Member(BaseModel):
+    """
+    Club members (applications stored here)
     """
     name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    email: EmailStr = Field(..., description="Contact email")
+    art_focus: Optional[str] = Field(None, description="Primary art focus e.g., Painting, Sculpture")
+    bio: Optional[str] = Field(None, description="Short bio")
+    portfolio_link: Optional[str] = Field(None, description="Portfolio URL")
 
-class Product(BaseModel):
+
+class Message(BaseModel):
     """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
+    Contact form messages sent to the club
     """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
-
-# Add your own schemas here:
-# --------------------------------------------------
-
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+    name: str = Field(...)
+    email: EmailStr = Field(...)
+    subject: str = Field(...)
+    body: str = Field(...)
